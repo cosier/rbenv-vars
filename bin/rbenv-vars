@@ -17,14 +17,19 @@ if [ "$1" = "--version" ] || [ "$1" = "-v" ]; then
   echo "rbenv-vars 1.2.0"
   exit
 fi
-
 traverse-rbenv-vars-files() {
   local root="$1"
   local results=""
 
   while [ -n "$root" ]; do
-    if [ -e "${root}/.rbenv-vars" ]; then
-      results="${root}/.rbenv-vars"$'\n'"$results"
+    if [ -n "$RBENV_ENV" ] && [ -e "${root}/.rbenv-vars.${RBENV_ENV}" ]; then
+      results="${root}/.rbenv-vars.${RBENV_ENV}"$'\n'"$results"
+      # echo "[rbenv:${RBENV_ENV}] ${results}"
+    else
+      if [ -e "${root}/.rbenv-vars" ]; then
+        results="${root}/.rbenv-vars"$'\n'"$results"
+        # echo "[rbenv] .rbenv-vars"
+      fi
     fi
     root="${root%/*}"
   done
@@ -35,7 +40,6 @@ traverse-rbenv-vars-files() {
     return 1
   fi
 }
-
 find-rbenv-vars-files() {
   if [ -e "${RBENV_ROOT}/vars" ]; then
     echo "${RBENV_ROOT}/vars"
